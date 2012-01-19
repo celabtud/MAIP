@@ -5,6 +5,8 @@
 #include <iostream>
 
 #include "MemInfo.h"
+#include "ticpp.h"
+#include "global.h"
 
 using namespace std; 
 
@@ -45,5 +47,8 @@ public:
     void print(ostream &of);
     void updateMemInfo(void * ip, void * esp, char r, void * addr, int32_t size, bool isprefetch, bool sameinst);
 
+    void outputXML(ticpp::Element *function);
+private:
+    static ticpp::Element *createMeasurementTag(const string &name, double value);
 };
 #endif // __FUNCTION_H

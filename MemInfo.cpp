@@ -304,45 +304,45 @@ void MemInfo::print(ostream &of)
 
 void MemInfo::update(void * ip, void * esp, char r, void * addr, int size, bool isprefetch, bool sameinst)
 {
-	//reading *addr (with respect to the size should reveal the value read or written)
-	// not checking prefetch at the moment!
-	// the ip is also not used here!
+    //reading *addr (with respect to the size should reveal the value read or written)
+    // not checking prefetch at the moment!
+    // the ip is also not used here!
 
-	if (r=='R')
-	{
-		if (addr >= esp) // stack region
-		{
-			if(!sameinst) // for the second read do not increment the number of instructions
-				total_memory_read_ins_stack++;
-			
-			memory_read_stack_bytes+=size;
-		}
-		else 
-		{
-			if(!sameinst) // for the second read do not increment the number of instructions
-				total_memory_read_ins_nostack++;
-			
-			memory_read_nostack_bytes+=size;
-		}
-	}
-	else // r=='w'
-	{
-		if (addr >= esp) // stack region
-		{
-			if(!sameinst) // for a combined r/w instruction which was counted in the first read do not increment the number of instructions
-				total_memory_write_ins_stack++;
-			
-			memory_write_stack_bytes+=size;
-		}
-		else 
-		{
-			if(!sameinst) // for a combined r/w instruction which was counted in the first read do not increment the number of instructions
-				total_memory_write_ins_nostack++;
-			
-			memory_write_nostack_bytes+=size;
-		}
-	
-	} // end of write access
+    if (r=='R')
+    {
+        if (addr >= esp) // stack region
+        {
+            if(!sameinst) // for the second read do not increment the number of instructions
+                total_memory_read_ins_stack++;
+
+            memory_read_stack_bytes+=size;
+        }
+        else 
+        {
+            if(!sameinst) // for the second read do not increment the number of instructions
+                total_memory_read_ins_nostack++;
+
+            memory_read_nostack_bytes+=size;
+        }
+    }
+    else // r=='w'
+    {
+        if (addr >= esp) // stack region
+        {
+            if(!sameinst) // for a combined r/w instruction which was counted in the first read do not increment the number of instructions
+                total_memory_write_ins_stack++;
+
+            memory_write_stack_bytes+=size;
+        }
+        else 
+        {
+            if(!sameinst) // for a combined r/w instruction which was counted in the first read do not increment the number of instructions
+                total_memory_write_ins_nostack++;
+
+            memory_write_nostack_bytes+=size;
+        }
+
+    } // end of write access
 }
 
 void MemInfo::processOperand(void * ip, void * addr, void * esp, uint32_t size, bool isread)
@@ -367,4 +367,68 @@ void MemInfo::processOperand(void * ip, void * addr, void * esp, uint32_t size, 
             total_memory_write_operand_nostack++;
         }	
     }
+}
+
+ticpp::Element * MemInfo::createMeasurementTag(const string& name, double value)
+{
+    ticpp::Element *measurement = new ticpp::Element(g_namespace + "measurement");
+
+    measurement->SetAttribute("name",name);
+    measurement->SetAttribute("type","runtime");
+    measurement->SetAttribute("by","MAIP");
+    measurement->SetAttribute("unit", "unknown");
+    measurement->SetText(value);
+    return measurement;
+}
+void MemInfo::outputXML(ticpp::Element *parent)
+{
+    parent->LinkEndChild(createMeasurementTag("Computational Contribution",getContribution()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Instructions executed",totalinst));
+    parent->LinkEndChild(createMeasurementTag("Total # of Memory Access Instructions executed",getMemoryIns()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Stack Access Instructions executed",getStackIns()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Heap Access Instructions executed",getHeapMemoryIns()));
+
+    parent->LinkEndChild(createMeasurementTag("Total # of Memory reads",getMemoryReadsIns()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Stack reads",total_memory_read_ins_stack));
+    parent->LinkEndChild(createMeasurementTag("Total # of Heap reads",total_memory_read_ins_nostack));
+    parent->LinkEndChild(createMeasurementTag("Total # of Memory writes",getMemoryWritesIns()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Stack writes",total_memory_write_ins_stack));
+    parent->LinkEndChild(createMeasurementTag("Total # of Heap writes",total_memory_write_ins_nostack));
+
+    parent->LinkEndChild(createMeasurementTag("Total # of Memory bytes accessed",getMemoryBytes()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Stack bytes accessed",getStackBytes()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Heap bytes accessed",getHeapBytes()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Memory bytes read",getMemoryReadsBytes()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Stack bytes read",memory_read_stack_bytes));
+    parent->LinkEndChild(createMeasurementTag("Total # of Heap bytes read",memory_read_nostack_bytes));
+    parent->LinkEndChild(createMeasurementTag("Total # of Memory bytes written",getMemoryWritesBytes()));
+    parent->LinkEndChild(createMeasurementTag("Total # of Stack bytes written",memory_write_stack_bytes));
+    parent->LinkEndChild(createMeasurementTag("Total # of Heap bytes written",memory_write_nostack_bytes));
+
+    parent->LinkEndChild(createMeasurementTag("Avg MAR Index",getMAIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Avg Heap MAR Index",getHeapMAIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Avg MOR Index",getMOIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Avg Heap MOR Index",getHeapMOIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Avg Stack Ratio",getStackRatio()));
+    parent->LinkEndChild(createMeasurementTag("Avg Flow Ratio",getFlowRatio()));
+    parent->LinkEndChild(createMeasurementTag("Avg Heap Flow Ratio",getHeapFlowRatio()));
+    parent->LinkEndChild(createMeasurementTag("Avg Bytes Per Access",getBytesPerAccess()));
+
+    parent->LinkEndChild(createMeasurementTag("Max MAR Index",getMaxMAIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Max Heap MAR Index",getMaxHeapMAIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Max MOR Index",getMaxMOIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Max Heap MOR Index",getMaxHeapMOIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Max Stack Ratio",getMaxStackRatio()));
+    parent->LinkEndChild(createMeasurementTag("Max Flow Ratio",getMaxFlowRatio()));
+    parent->LinkEndChild(createMeasurementTag("Max Heap Flow Ratio",getMaxHeapFlowRatio()));
+    parent->LinkEndChild(createMeasurementTag("Max Bytes Per Access",getMaxBytesPerAccess()));
+
+    parent->LinkEndChild(createMeasurementTag("Min MAR Index",getMinMAIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Min Heap MAR Index",getMinHeapMAIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Min MOR Index",getMinMOIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Min Heap MOR Index",getMinHeapMOIIndex()));
+    parent->LinkEndChild(createMeasurementTag("Min Stack Ratio",getMinStackRatio()));
+    parent->LinkEndChild(createMeasurementTag("Min Flow Ratio",getMinFlowRatio()));
+    parent->LinkEndChild(createMeasurementTag("Min Heap Flow Ratio",getMinHeapFlowRatio()));
+    parent->LinkEndChild(createMeasurementTag("Min Bytes Per Access",getMinBytesPerAccess()));
 }

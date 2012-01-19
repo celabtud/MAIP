@@ -1,6 +1,0 @@
-export IMRANHOME=/home/iashraf
-export PIN_HOME=${IMRANHOME}/pin
-export QUADHOME=$PINHOME/myTools/QUADv0.4.3/obj-intel64
-export CQUADHOME=$PINHOME/myTools/cQUADv0.1/obj-intel64
-export PATH=/home/iashraf/bin:$PINHOME:$PATH
-

@@ -47,7 +47,7 @@ endif
 ifeq ($(TARGET_COMPILER),gnu)
     include $(PIN_HOME)/source/tools/makefile.gnu.config
     LINKER?=${CXX}
-    CXXFLAGS ?= -Wall -Werror -Wno-unknown-pragmas $(DBG) $(OPT)
+    CXXFLAGS ?= -Wall -Werror -Wno-unknown-pragmas $(DBG) $(OPT) -std=gnu++0x
 #    CXXFLAGS ?= -Wall -Werror -Wno-unknown-pragmas $(OPT) -g -std=gnu++0x
     PIN=$(PIN_HOME)/pin
 endif
@@ -91,12 +91,17 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)%.o : %.cpp
-	$(CXX) -c $(CXXFLAGS) $(PIN_CXXFLAGS) ${OUTOPT}$@ $<
+	$(CXX) -c -DTIXML_USE_TICPP $(CXXFLAGS) $(PIN_CXXFLAGS) ${OUTOPT}$@ $<
+# 	$(CXX) -c $(CXXFLAGS) $(PIN_CXXFLAGS) ${OUTOPT}$@ $<
 
-$(TOOLS): $(PIN_LIBNAMES) $(OBJDIR)Function.o $(OBJDIR)MemInfo.o
+$(TOOLS): $(PIN_LIBNAMES) $(OBJDIR)Function.o $(OBJDIR)MemInfo.o $(OBJDIR)ticpp.o $(OBJDIR)tinyxmlparser.o $(OBJDIR)tinystr.o $(OBJDIR)tinyxml.o $(OBJDIR)tinyxmlerror.o $(OBJDIR)xmloutput.o
+$(TOOLS): %$(PINTOOL_SUFFIX) : %.o 
+	${PIN_LD} $(PIN_LDFLAGS) $(LINK_DEBUG) ${LINK_OUT}$@ $< $(OBJDIR)Function.o $(OBJDIR)MemInfo.o $(OBJDIR)ticpp.o $(OBJDIR)tinyxmlparser.o $(OBJDIR)tinystr.o $(OBJDIR)tinyxml.o $(OBJDIR)tinyxmlerror.o $(OBJDIR)xmloutput.o ${PIN_LPATHS} $(PIN_LIBS) $(DBG)
 
-$(TOOLS): %$(PINTOOL_SUFFIX) : %.o
-	${LINKER} $(PIN_LDFLAGS) $(LINK_DEBUG) ${LINK_OUT}$@ $< $(OBJDIR)Function.o $(OBJDIR)MemInfo.o ${PIN_LPATHS} $(PIN_LIBS) $(DBG)
+
+# $(TOOLS): $(PIN_LIBNAMES) $(OBJDIR)Function.o $(OBJDIR)MemInfo.o
+# $(TOOLS): %$(PINTOOL_SUFFIX) : %.o
+# 	${LINKER} $(PIN_LDFLAGS) $(LINK_DEBUG) ${LINK_OUT}$@ $< $(OBJDIR)Function.o $(OBJDIR)MemInfo.o ${PIN_LPATHS} $(PIN_LIBS) $(DBG)
 
 
 ## cleaning

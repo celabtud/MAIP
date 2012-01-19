@@ -1,8 +1,11 @@
 #ifndef   __MEMINFO_H
 #define   __MEMINFO_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <iostream>
+
+#include "ticpp.h"
+#include "global.h"
 
 using namespace std;
 
@@ -131,6 +134,10 @@ public:
     long double getContribution() const;
 
     void print(ostream &of);
+    
+    void outputXML(ticpp::Element *function);
+private:
+    static ticpp::Element *createMeasurementTag(const string &name, double value);
 }; 
   
 
