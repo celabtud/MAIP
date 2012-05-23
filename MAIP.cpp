@@ -131,11 +131,9 @@ VOID EnterFC(char *arg_name, bool flag, RTN rtn)
     string name = arg_name;
 
     // revise the following in case you want to exclude some unwanted functions under Windows and/or Linux
-
     if (!evaluate_libs && !flag) return;   // not found in the main image, so skip the current function name update
 
 #ifdef WIN32
-
     if(		
             name[0]=='_' ||
             name[0]=='?' ||
@@ -154,10 +152,13 @@ VOID EnterFC(char *arg_name, bool flag, RTN rtn)
             !name.compare("unnamedImageEntryPoint")
       ) return;
 #else
-
-    if( name[0]=='_' || name[0]=='?' || 
-            !name.compare("call_gmon_start") || !name.compare("frame_dummy") 
-      ) return;
+    if( name[0]=='_' ||
+		name[0]=='.' || 
+		name[0]=='?' || 
+        !name.compare("call_gmon_start") || 
+        !name.compare("frame_dummy") 
+      ) 
+		return;
 #endif
 
 

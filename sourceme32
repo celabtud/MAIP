@@ -1,5 +1,5 @@
 export IMRANHOME=/home/iashraf
-export PIN_HOME=${IMRANHOME}/pin2.8
+export PIN_HOME=${IMRANHOME}/pin-2.11
 export QUADHOME=$PINHOME/myTools/QUAD/obj-ia32
 export CQUADHOME=$PINHOME/myTools/cQUAD/obj-ia32
 export MAIPHOME=$PINHOME/myTools/MAIP/obj-ia32
